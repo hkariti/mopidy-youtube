@@ -37,6 +37,20 @@ def safe_url(uri):
     ).strip()
 
 
+def parse_api_object(item):
+    video_id = item['id']['videoId']
+    title = item['snippet']['title']
+    uri = 'youtube:video/%s.%s' % (
+        safe_url(title), video_id
+    )
+    thumbnails = []
+    for thumb in ['high', 'medium', 'default']:
+        thumbnail = item['snippet']['thumbnails'].get(thumb)
+        if thumbnail:
+            thumbnails.append(thumbnail)
+
+    return track(uri, video_id, title, thumbnails)
+
 def resolve_url(url, stream=False):
     video = pafy.new(url)
     if not stream:
@@ -53,27 +67,31 @@ def resolve_url(url, stream=False):
     if not uri:
         return
 
-    if '-' in video.title:
+def track(uri, video_id, title, length=0, thumbnails=None):
+    if not thumbnails:
+        thumbnails = list()
+
+    if '-' in title:
         title = video.title.split('-')
         track = Track(
             name=title[1].strip(),
-            comment=video.videoid,
-            length=video.length*1000,
+            comment=video_id,
+            length=length*1000,
             artists=[Artist(name=title[0].strip())],
             album=Album(
                 name='Youtube',
-                images=[video.bigthumb, video.bigthumbhd]
+                images=thumbnails
             ),
             uri=uri
         )
     else:
         track = Track(
-            name=video.title,
-            comment=video.videoid,
-            length=video.length*1000,
+            name=title,
+            comment=video_id,
+            length=length*1000,
             album=Album(
                 name='Youtube',
-                images=[video.bigthumb, video.bigthumbhd]
+                images=thumbnails
             ),
             uri=uri
         )
@@ -82,7 +100,7 @@ def resolve_url(url, stream=False):
 
 def search_youtube(q):
     query = {
-        'part': 'id',
+        'part': 'id,snippet',
         'maxResults': 15,
         'type': 'video',
         'q': q,
@@ -92,7 +110,8 @@ def search_youtube(q):
     playlist = []
     for yt_id in pl.json().get('items'):
         try:
-            track = resolve_url(yt_id.get('id').get('videoId'))
+            track = parse_api_object(yt_id)
+            #track = resolve_url(yt_id.get('id').get('videoId'))
             playlist.append(track)
         except Exception as e:
             logger.info(e.message)
