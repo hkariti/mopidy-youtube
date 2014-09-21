@@ -120,19 +120,18 @@ def search_youtube(q):
 
 def resolve_playlist(url):
     logger.info("Resolving Youtube for playlist '%s'", url)
-    query = {
-        'part': 'snippet',
-        'maxResults': 50,
-        'playlistId': url,
-        'fields': 'items/snippet/resourceId',
-        'key': yt_key
-    }
-    pl = requests.get(yt_api_endpoint+'playlistItem', params=query)
+    pl = pafy.get_playlist(url)
     playlist = []
-    for yt_id in pl.json().get('items'):
+    for yt_id in pl["items"]:
         try:
-            yt_id = yt_id.get('snippet').get('resourceId').get('videoId')
-            playlist.append(resolve_url(yt_id))
+            video_id = yt_id["pafy"].videoid
+            title = yt_id["title"]
+            uri = 'youtube:video/%s.%s' % (
+                safe_url(title), video_id
+            )
+            thumbnails = [yt_id["thumbnail"]]
+            video = track(uri, video_id, title, thumbnails)
+            playlist.append(video)
         except Exception as e:
             logger.info(e.message)
     return playlist
