@@ -73,7 +73,7 @@ def track(uri, video_id, title, length=0, thumbnails=None):
 
     if '-' in title:
         title = video.title.split('-')
-        track = Track(
+        track_obj = Track(
             name=title[1].strip(),
             comment=video_id,
             length=length*1000,
@@ -85,7 +85,7 @@ def track(uri, video_id, title, length=0, thumbnails=None):
             uri=uri
         )
     else:
-        track = Track(
+        track_obj = Track(
             name=title,
             comment=video_id,
             length=length*1000,
@@ -95,7 +95,7 @@ def track(uri, video_id, title, length=0, thumbnails=None):
             ),
             uri=uri
         )
-    return track
+    return track_obj
 
 
 def search_youtube(q):
