@@ -112,7 +112,9 @@ def search_youtube(q):
     }
     pl = requests.get(yt_api_endpoint+'search', params=query)
     playlist = []
-    for item in pl.json().get('items'):
+    items = pl.json().get('items')
+    logger.debug("Items from api call: %s" % items)
+    for item in items:
         try:
             track = parse_api_object(item)
             playlist.append(track)
