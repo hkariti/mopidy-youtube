@@ -49,7 +49,7 @@ def parse_api_object(item):
         if thumbnail:
             thumbnails.append(thumbnail)
 
-    return track(uri, video_id, title, thumbnails)
+    return track(uri, video_id, title, thumbnails=thumbnails)
 
 def resolve_url(url, stream=False):
     video = pafy.new(url)
@@ -66,6 +66,9 @@ def resolve_url(url, stream=False):
         uri = uri.url
     if not uri:
         return
+
+    thumbnails = [video.bigthumbhd, video.bigthumb]
+    return track(uri, video.videoid, video.title, video.length, thumbnails)
 
 def track(uri, video_id, title, length=0, thumbnails=None):
     if not thumbnails:
