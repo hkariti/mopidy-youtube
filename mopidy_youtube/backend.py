@@ -111,13 +111,12 @@ def search_youtube(q):
     }
     pl = requests.get(yt_api_endpoint+'search', params=query)
     playlist = []
-    for yt_id in pl.json().get('items'):
+    for item in pl.json().get('items'):
         try:
-            track = parse_api_object(yt_id)
-            #track = resolve_url(yt_id.get('id').get('videoId'))
+            track = parse_api_object(item)
             playlist.append(track)
         except Exception as e:
-            logger.info(e.message)
+            logger.exception(e.message)
     return playlist
 
 
