@@ -92,6 +92,7 @@ def track(uri, video_id, title, length=0, thumbnails=None):
         track_obj = Track(
             name=title,
             comment=video_id,
+            artists=[''],
             length=length*1000,
             album=Album(
                 name='Youtube',
