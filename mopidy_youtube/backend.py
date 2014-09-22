@@ -67,7 +67,7 @@ def resolve_url(url, stream=False):
     if not uri:
         return
 
-    thumbnails = [video.bigthumbhd, video.bigthumb]
+    thumbnails = filter(None, [video.bigthumbhd, video.bigthumb])
     return track(uri, video.videoid, video.title, video.length, thumbnails)
 
 def track(uri, video_id, title, length=0, thumbnails=None):
