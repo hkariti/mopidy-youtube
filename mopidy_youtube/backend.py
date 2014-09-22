@@ -46,7 +46,6 @@ def parse_api_object(item):
     thumbnails = []
     for thumb in ['high', 'medium', 'default']:
         thumbnail = item['snippet']['thumbnails'].get(thumb)
-        logger.info(str(thumbnail))
         if thumbnail:
             thumbnails.append(thumbnail['url'])
 
