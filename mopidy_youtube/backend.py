@@ -115,7 +115,7 @@ def search_youtube(q):
     pl = requests.get(yt_api_endpoint+'search', params=query)
     playlist = []
     items = pl.json().get('items')
-    logger.debug("Items from api call: %s" % items)
+    logger.debug("%d Items from api call" % len(items))
     for item in items:
         try:
             track = parse_api_object(item)
@@ -123,7 +123,7 @@ def search_youtube(q):
         except Exception as e:
             logger.exception(e.message)
 
-    logger.debug("Search resulted in: %s" % playlist)
+    logger.debug("Search resulted in %d items" % len(playlist))
     return playlist
 
 
