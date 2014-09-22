@@ -139,7 +139,7 @@ def resolve_playlist(url):
                 safe_url(title), video_id
             )
             thumbnails = [yt_id["playlist_meta"]["thumbnail"]]
-            video = track(uri, video_id, title, thumbnails)
+            video = track(uri, video_id, title, thumbnails=thumbnails)
             playlist.append(video)
         except Exception as e:
             logger.exception(e.message)
