@@ -75,7 +75,7 @@ def track(uri, video_id, title, length=0, thumbnails=None):
         thumbnails = list()
 
     if '-' in title:
-        title = video.title.split('-')
+        title = title.split('-')
         track_obj = Track(
             name=title[1].strip(),
             comment=video_id,
