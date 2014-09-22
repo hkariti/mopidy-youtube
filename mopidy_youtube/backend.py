@@ -72,6 +72,7 @@ def resolve_url(url, stream=False):
 
 def track(uri, video_id, title, length=0, thumbnails=None):
     if not thumbnails:
+        logger.debug("Using empty thumbnails list")
         thumbnails = list()
 
     if '-' in title:
@@ -98,6 +99,8 @@ def track(uri, video_id, title, length=0, thumbnails=None):
             ),
             uri=uri
         )
+
+    logger.debug("Created track object: %s" % track_obj)
     return track_obj
 
 
@@ -119,6 +122,8 @@ def search_youtube(q):
             playlist.append(track)
         except Exception as e:
             logger.exception(e.message)
+
+    logger.debug("Search resulted in: %s" % playlist)
     return playlist
 
 
