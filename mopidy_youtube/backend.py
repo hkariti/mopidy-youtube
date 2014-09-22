@@ -154,12 +154,16 @@ class YoutubeBackend(pykka.ThreadingActor, backend.Backend):
 class YoutubeLibraryProvider(backend.LibraryProvider):
 
     def lookup(self, track):
+        logger.debug("Logging up track: %s" % track)
+
         if 'yt:' in track:
             track = track.replace('yt:', '')
 
         if 'youtube.com' in track:
             url = urlparse(track)
             req = parse_qs(url.query)
+            logger.debug("urlparse()ed track is %s" % url)
+            logger.debug("parse_qs()ed url is %s" % req)
             if 'list' in req:
                 return resolve_playlist(req.get('list')[0])
             else:
@@ -170,6 +174,9 @@ class YoutubeLibraryProvider(backend.LibraryProvider):
     def search(self, query=None, uris=None):
         if not query:
             return
+
+        logger.debug("Got query: %s" % query)
+        logger.debug("Got uris: %s" % uris)
 
         if 'uri' in query:
             search_query = ''.join(query['uri'])
@@ -183,7 +190,7 @@ class YoutubeLibraryProvider(backend.LibraryProvider):
                     )
                 else:
                     logger.info(
-                        "Resolving Youtube for track '%s'", search_query)
+                        "Query is a specific track '%s'", search_query)
                     return SearchResult(
                         uri='youtube:search',
                         tracks=[resolve_url(search_query)]
