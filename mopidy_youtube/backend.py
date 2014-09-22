@@ -134,15 +134,15 @@ def resolve_playlist(url):
     for yt_id in pl["items"]:
         try:
             video_id = yt_id["pafy"].videoid
-            title = yt_id["title"]
+            title = yt_id["playlist_meta"]["title"]
             uri = 'youtube:video/%s.%s' % (
                 safe_url(title), video_id
             )
-            thumbnails = [yt_id["thumbnail"]]
+            thumbnails = [yt_id["playlist_meta"]["thumbnail"]]
             video = track(uri, video_id, title, thumbnails)
             playlist.append(video)
         except Exception as e:
-            logger.info(e.message)
+            logger.exception(e.message)
     return playlist
 
 
