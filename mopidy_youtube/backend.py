@@ -203,7 +203,7 @@ class YoutubeLibraryProvider(backend.LibraryProvider):
                         tracks=[resolve_url(search_query)]
                     )
         else:
-            search_query = '|'.join(query.values()[0]).replace(' ', '|')
+            search_query = ' '.join(query.values()[0])
             logger.info("Searching Youtube for query '%s'", search_query)
             return SearchResult(
                 uri='youtube:search',
