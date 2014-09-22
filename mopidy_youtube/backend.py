@@ -46,8 +46,9 @@ def parse_api_object(item):
     thumbnails = []
     for thumb in ['high', 'medium', 'default']:
         thumbnail = item['snippet']['thumbnails'].get(thumb)
+        logger.info(str(thumbnail))
         if thumbnail:
-            thumbnails.append(thumbnail)
+            thumbnails.append(thumbnail['url'])
 
     return track(uri, video_id, title, thumbnails=thumbnails)
 
@@ -188,7 +189,7 @@ class YoutubeLibraryProvider(backend.LibraryProvider):
                         tracks=[resolve_url(search_query)]
                     )
         else:
-            search_query = '|'.join(query.values()[0])
+            search_query = '|'.join(query.values()[0]).replace(' ', '|')
             logger.info("Searching Youtube for query '%s'", search_query)
             return SearchResult(
                 uri='youtube:search',
