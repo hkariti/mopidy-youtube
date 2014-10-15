@@ -40,6 +40,7 @@ def safe_url(uri):
 def parse_api_object(item):
     video_id = item['id']['videoId']
     title = item['snippet']['title']
+    channel_title = item['snippet']['channelTitle']
     uri = 'youtube:video/%s.%s' % (
         safe_url(title), video_id
     )
@@ -49,7 +50,7 @@ def parse_api_object(item):
         if thumbnail:
             thumbnails.append(thumbnail['url'])
 
-    return track(uri, video_id, title, thumbnails=thumbnails)
+    return track(uri, video_id, title, thumbnails=thumbnails, channel_title=channel_title)
 
 def resolve_url(url, stream=False):
     video = pafy.new(url)
@@ -68,9 +69,10 @@ def resolve_url(url, stream=False):
         return
 
     thumbnails = filter(None, [video.bigthumbhd, video.bigthumb])
-    return track(uri, video.videoid, video.title, video.length, thumbnails)
+    channel_title = '%s (Youtube)' % video.author
+    return track(uri, video.videoid, video.title, video.length, thumbnails, channel_title)
 
-def track(uri, video_id, title, length=0, thumbnails=None):
+def track(uri, video_id, title, length=0, thumbnails=None, channel_title='Youtube'):
     if not thumbnails:
         logger.debug("Using empty thumbnails list")
         thumbnails = list()
@@ -83,7 +85,7 @@ def track(uri, video_id, title, length=0, thumbnails=None):
             length=length*1000,
             artists=[Artist(name=title[0].strip())],
             album=Album(
-                name='Youtube',
+                name=channel_title,
                 images=thumbnails
             ),
             uri=uri
@@ -140,7 +142,7 @@ def resolve_playlist(url):
                 safe_url(title), video_id
             )
             thumbnails = [yt_id["playlist_meta"]["thumbnail"]]
-            video = track(uri, video_id, title, thumbnails=thumbnails)
+            video = track(uri, video_id, title, thumbnails=thumbnails, channel_title=pl['title'])
             playlist.append(video)
         except Exception as e:
             logger.exception(e.message)
