@@ -97,7 +97,7 @@ def track(uri, video_id, title, length=0, thumbnails=None, channel_title='Youtub
             artists=[Artist(name="Unknown Artist")],
             length=length*1000,
             album=Album(
-                name='Youtube',
+                name=channel_title,
                 images=thumbnails
             ),
             uri=uri
