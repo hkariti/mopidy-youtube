@@ -69,7 +69,7 @@ def resolve_url(url, stream=False):
         return
 
     thumbnails = filter(None, [video.bigthumbhd, video.bigthumb])
-    channel_title = '%s (Youtube)' % video.author
+    channel_title = '%s (Youtube: %s)' % (video.author, video.videoid)
     return track(uri, video.videoid, video.title, video.length, thumbnails, channel_title)
 
 def track(uri, video_id, title, length=0, thumbnails=None, channel_title='Youtube'):
