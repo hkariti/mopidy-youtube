@@ -78,7 +78,7 @@ def track(uri, video_id, title, length=0, thumbnails=None):
     if '-' in title:
         title = title.split('-')
         track_obj = Track(
-            name=title[1].strip(),
+            name=title[1:].strip(),
             comment=video_id,
             length=length*1000,
             artists=[Artist(name=title[0].strip())],
