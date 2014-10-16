@@ -58,7 +58,7 @@ def parse_api_object(item, track_details=None):
     if track_details:
         length = parse_duration(track_details['duration'])
     else:
-        length = None
+        length = 0
     return track(uri, video_id, title, thumbnails=thumbnails, channel_title=channel_title, length=length)
 
 def resolve_url(url, stream=False):
