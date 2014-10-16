@@ -36,8 +36,13 @@ def safe_url(uri):
         ''.join(c for c in safe_uri if c in valid_chars)
     ).strip()
 
+def parse_duration(duration):
+    times = re.match('^PT(\d+)M(\s+)S$', duration)
+    if times:
+        minutes, seconds = times.groups()
+        return minutes*60 + seconds
 
-def parse_api_object(item):
+def parse_api_object(item, track_details=None):
     video_id = item['id']['videoId']
     title = item['snippet']['title']
     channel_title = '%s (Youtube: %s)' % (item['snippet']['channelTitle'], video_id)
@@ -50,7 +55,11 @@ def parse_api_object(item):
         if thumbnail:
             thumbnails.append(thumbnail['url'])
 
-    return track(uri, video_id, title, thumbnails=thumbnails, channel_title=channel_title)
+    if track_details:
+        length = parse_duration(track_details['duration'])
+    else:
+        length = None
+    return track(uri, video_id, title, thumbnails=thumbnails, channel_title=channel_title, length=length)
 
 def resolve_url(url, stream=False):
     video = pafy.new(url)
@@ -124,9 +133,25 @@ def search_youtube(q):
     playlist = []
     items = pl.json().get('items')
     logger.debug("%d Items from api call" % len(items))
+    if not items:
+        return []
+
+    ids = ','.join([ x['id']['videoId'] for x in items ])
+    query = {
+        'part': 'contentDetails',
+        'id': ids,
+        'key': yt_key
+    }
+    req = requests.get(yt_api_endpoint+'videos', params=query)
+    content_details = req.json().get('items')
+
     for item in items:
         try:
-            track = parse_api_object(item)
+            try:
+                track_details = filter(lambda x: x['id'] == item['id']['videoId'], content_details)[0]['contentDetails']
+            except IndexError:
+                track_details = None
+            track = parse_api_object(item, track_details)
             playlist.append(track)
         except Exception as e:
             logger.exception(e.message)
