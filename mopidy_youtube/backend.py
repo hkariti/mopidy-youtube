@@ -37,10 +37,12 @@ def safe_url(uri):
     ).strip()
 
 def parse_duration(duration):
-    times = re.match('^PT(\d+)M(\s+)S$', duration)
+    times = re.match('^PT(\d+)M(\d+)S$', duration)
     if times:
         minutes, seconds = times.groups()
         return minutes*60 + seconds
+
+    return 0
 
 def parse_api_object(item, track_details=None):
     video_id = item['id']['videoId']
