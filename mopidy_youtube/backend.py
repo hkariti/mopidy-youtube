@@ -40,7 +40,7 @@ def parse_duration(duration):
     times = re.match('^PT(\d+)M(\d+)S$', duration)
     if times:
         minutes, seconds = times.groups()
-        return minutes*60 + seconds
+        return int(minutes)*60 + int(seconds)
 
     return 0
 
