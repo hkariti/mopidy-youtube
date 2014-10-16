@@ -182,8 +182,8 @@ def resolve_playlist(url):
     playlist = []
     for yt_id in pl["items"]:
         try:
-            track_details = get_track_details(video_id, content_details)
             video_id = yt_id["pafy"].videoid
+            track_details = get_track_details(video_id, content_details)
             title = yt_id["playlist_meta"]["title"]
             uri = 'youtube:video/%s.%s' % (
                 safe_url(title), video_id
