@@ -15,6 +15,8 @@ from mopidy_youtube import logger
 yt_api_endpoint = 'https://www.googleapis.com/youtube/v3/'
 yt_key = 'AIzaSyAl1Xq9DwdE_KD4AtPaE4EJl3WZe2zCqg4'
 
+# Request detailed info on this many results
+MAX_DETAILED_RESULT_LENGTH = 50
 
 def resolve_track(track, stream=False):
     logger.debug("Resolving Youtube for track '%s'", track)
@@ -125,6 +127,7 @@ def track(uri, video_id, title, length=0, thumbnails=None, channel_title='Youtub
     return track_obj
 
 def get_track_details(video_id, content_details):
+    logger.debug("Got id: %s content_details: %s" % (video_id, content_details))
     if content_details:
         details = filter(lambda x: x['id'] == video_id, content_details)
         if details:
@@ -144,7 +147,7 @@ def search_youtube(q):
     if not items:
         return []
 
-    ids = ','.join([ x['id']['videoId'] for x in items ])
+    ids = ','.join([ x['id']['videoId'] for x in items ][:MAX_DETAILED_RESULT_LENGTH])
     query = {
         'part': 'contentDetails',
         'id': ids,
@@ -170,13 +173,15 @@ def resolve_playlist(url):
     logger.info("Resolving Youtube for playlist '%s'", url)
     pl = pafy.get_playlist(url)
 
-    ids = ','.join([ x['pafy'].videoid for x in pl['items'] ])
+    ids = ','.join([ x['pafy'].videoid for x in pl['items'][:MAX_DETAILED_RESULT_LENGTH] ])
     query = {
         'part': 'contentDetails',
         'id': ids,
         'key': yt_key
     }
+    logger.debug("request: %s" % query)
     req = requests.get(yt_api_endpoint+'videos', params=query)
+    logger.debug("Response: %s" % req.json())
     content_details = req.json().get('items')
 
     playlist = []
@@ -189,7 +194,10 @@ def resolve_playlist(url):
                 safe_url(title), video_id
             )
             thumbnails = [yt_id["playlist_meta"]["thumbnail"]]
-            length = parse_duration(track_details['duration'])
+            if track_details:
+                length = parse_duration(track_details['duration'])
+            else:
+                length = 0
             video = track(uri, video_id, title, thumbnails=thumbnails, channel_title=pl['title'], album_uri=pl['playlist_id'], length=length)
             playlist.append(video)
         except Exception as e:
