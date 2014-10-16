@@ -84,6 +84,8 @@ def resolve_url(url, stream=False):
     return track(uri, video.videoid, video.title, video.length, thumbnails, channel_title)
 
 def track(uri, video_id, title, length=0, thumbnails=None, channel_title='Youtube', album_uri=None):
+    length = length or 0
+
     if not thumbnails:
         logger.debug("Using empty thumbnails list")
         thumbnails = list()
@@ -122,6 +124,11 @@ def track(uri, video_id, title, length=0, thumbnails=None, channel_title='Youtub
     logger.debug("Created track object: %s" % track_obj)
     return track_obj
 
+def get_track_details(video_id, content_details):
+    if content_details:
+        details = filter(lambda x: x['id'] == video_id, content_details)
+        if details:
+            return details[0]['contentDetails']
 
 def search_youtube(q):
     query = {
@@ -132,7 +139,6 @@ def search_youtube(q):
         'key': yt_key
     }
     pl = requests.get(yt_api_endpoint+'search', params=query)
-    playlist = []
     items = pl.json().get('items')
     logger.debug("%d Items from api call" % len(items))
     if not items:
@@ -147,12 +153,10 @@ def search_youtube(q):
     req = requests.get(yt_api_endpoint+'videos', params=query)
     content_details = req.json().get('items')
 
+    playlist = []
     for item in items:
         try:
-            try:
-                track_details = filter(lambda x: x['id'] == item['id']['videoId'], content_details)[0]['contentDetails']
-            except IndexError:
-                track_details = None
+            track_details = get_track_details(item['id']['videoId'], content_details)
             track = parse_api_object(item, track_details)
             playlist.append(track)
         except Exception as e:
@@ -165,16 +169,28 @@ def search_youtube(q):
 def resolve_playlist(url):
     logger.info("Resolving Youtube for playlist '%s'", url)
     pl = pafy.get_playlist(url)
+
+    ids = ','.join([ x['pafy'].videoid for x in pl['items'] ])
+    query = {
+        'part': 'contentDetails',
+        'id': ids,
+        'key': yt_key
+    }
+    req = requests.get(yt_api_endpoint+'videos', params=query)
+    content_details = req.json().get('items')
+
     playlist = []
     for yt_id in pl["items"]:
         try:
+            track_details = get_track_details(video_id, content_details)
             video_id = yt_id["pafy"].videoid
             title = yt_id["playlist_meta"]["title"]
             uri = 'youtube:video/%s.%s' % (
                 safe_url(title), video_id
             )
             thumbnails = [yt_id["playlist_meta"]["thumbnail"]]
-            video = track(uri, video_id, title, thumbnails=thumbnails, channel_title=pl['title'], album_uri=pl['playlist_id'])
+            length = parse_duration(track_details['duration'])
+            video = track(uri, video_id, title, thumbnails=thumbnails, channel_title=pl['title'], album_uri=pl['playlist_id'], length=length)
             playlist.append(video)
         except Exception as e:
             logger.exception(e.message)
