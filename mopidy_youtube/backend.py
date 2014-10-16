@@ -72,10 +72,13 @@ def resolve_url(url, stream=False):
     channel_title = '%s (Youtube: %s)' % (video.author, video.videoid)
     return track(uri, video.videoid, video.title, video.length, thumbnails, channel_title)
 
-def track(uri, video_id, title, length=0, thumbnails=None, channel_title='Youtube'):
+def track(uri, video_id, title, length=0, thumbnails=None, channel_title='Youtube', album_uri=None):
     if not thumbnails:
         logger.debug("Using empty thumbnails list")
         thumbnails = list()
+
+    if not album_uri:
+        album_uri = uri
 
     if '-' in title:
         title = title.split('-')
@@ -85,6 +88,7 @@ def track(uri, video_id, title, length=0, thumbnails=None, channel_title='Youtub
             length=length*1000,
             artists=[Artist(name=title[0].strip())],
             album=Album(
+                uri=album_uri,
                 name=channel_title,
                 images=thumbnails
             ),
@@ -97,6 +101,7 @@ def track(uri, video_id, title, length=0, thumbnails=None, channel_title='Youtub
             artists=[Artist(name="Unknown Artist")],
             length=length*1000,
             album=Album(
+                uri=album_uri,
                 name=channel_title,
                 images=thumbnails
             ),
@@ -142,7 +147,7 @@ def resolve_playlist(url):
                 safe_url(title), video_id
             )
             thumbnails = [yt_id["playlist_meta"]["thumbnail"]]
-            video = track(uri, video_id, title, thumbnails=thumbnails, channel_title=pl['title'])
+            video = track(uri, video_id, title, thumbnails=thumbnails, channel_title=pl['title'], album_uri=pl['playlist_id'])
             playlist.append(video)
         except Exception as e:
             logger.exception(e.message)
