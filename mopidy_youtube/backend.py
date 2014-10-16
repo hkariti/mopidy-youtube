@@ -40,7 +40,7 @@ def safe_url(uri):
 def parse_api_object(item):
     video_id = item['id']['videoId']
     title = item['snippet']['title']
-    channel_title = item['snippet']['channelTitle']
+    channel_title = '%s (Youtube: %s)' % (item['snippet']['channelTitle'], video_id)
     uri = 'youtube:video/%s.%s' % (
         safe_url(title), video_id
     )
