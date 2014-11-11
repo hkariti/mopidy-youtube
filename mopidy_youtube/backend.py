@@ -113,7 +113,7 @@ def track(uri, video_id, title, length=0, thumbnails=None, channel_title='Youtub
         track_obj = Track(
             name=title,
             comment=video_id,
-            artists=[Artist(name="Unknown Artist")],
+            artists=[],
             length=length*1000,
             album=Album(
                 uri=album_uri,
