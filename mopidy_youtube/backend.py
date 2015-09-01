@@ -65,6 +65,18 @@ def parse_api_object(item, track_details=None):
         length = 0
     return track(uri, video_id, title, thumbnails=thumbnails, channel_title=channel_title, length=length)
 
+def get_audio_stream(video):
+    """
+    Get the best audio stream, filtering out problematic codecs
+    """
+    BAD_ITAGS = [
+            '251' # gstreamer on mac os x seems to have problems with this
+            ]
+    audiostreams = filter(lambda x: x.itag not in BAD_ITAGS, video.audiostreams)
+    if not audiostreams:
+        return None
+    return audiostreams[0]
+
 def resolve_url(url, stream=False):
     video = pafy.new(url)
     if not stream:
@@ -72,7 +84,7 @@ def resolve_url(url, stream=False):
             safe_url(video.title), video.videoid
         )
     else:
-        uri = video.getbestaudio()
+        uri = get_audio_stream(video)
         if not uri:  # get video url
             uri = video.getbest()
         logger.debug('%s - %s %s %s' % (
